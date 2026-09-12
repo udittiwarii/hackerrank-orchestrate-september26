@@ -57,3 +57,40 @@ export interface FinancialState {
 	paymentMethodsUserWillConsider: string[];
 	maxInstallmentMonths: number | null;
 }
+
+export interface ForecastEvent {
+	eventId: string;
+	eventType: EventType;
+	description: string;
+	category: string;
+	direction: EventDirection;
+	amountInHomeCurrency: number;
+	sourceAmount: number;
+	sourceCurrency: Currency;
+	flexibility: Flexibility;
+	minimumAllowedAmount: number | null;
+	recurring: boolean;
+}
+
+export interface ForecastDay {
+	date: string;
+	startingBalance: number;
+	credits: number;
+	debits: number;
+	endingBalance: number;
+	minimumBalanceToKeep: number;
+	minimumBalanceViolated: boolean;
+	events: ForecastEvent[];
+}
+
+export interface FinancialForecast {
+	requestId: string;
+	userId: string;
+	startDate: string;
+	endDate: string;
+	startingBalance: number;
+	minimumBalanceToKeep: number;
+	days: ForecastDay[];
+	minimumProjectedBalance: number;
+	minimumProjectedBalanceDate: string;
+}

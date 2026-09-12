@@ -6,7 +6,8 @@
     "dev": "tsx main.ts",
     "build": "tsc",
     "start": "tsx main.ts",
-    "test:state": "tsx src/finance/state.test.ts"
+    "test:state": "tsx src/finance/state.test.ts",
+    "test:forecast": "tsx src/finance/forecast.test.ts"
   },
   "keywords": [],
   "author": "",

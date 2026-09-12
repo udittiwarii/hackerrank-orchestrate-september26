@@ -54,4 +54,10 @@ Only settled cash events affect settled cash classifications. Failed, cancelled,
 
 Forecasting, affordability, payment plans, spending changes, evidence interpretation, and output generation remain future phases. `src/finance/state.test.ts` runs deterministic checks against all 250 real requests without creating synthetic financial data.
 
+### Phase 4: 90-day forecast
+
+`src/finance/forecast.ts` projects the baseline from the request date through request date plus 89 days, inclusive. It starts at the Phase 3 balance after reserving pending debits, never adds pending credits, and does not replay historical settled cash. Future confirmed income and committed obligations are applied on their settlement/effective dates. Repeated historical expenses represented by the same event type, category, description, and direction are projected using their median observed positive interval; their latest observed converted amount, flexibility, and minimum amount are preserved. This is the dataset's only recurring representation; no message or live banking data is consulted.
+
+Dates are parsed and advanced at UTC midnight, so local timezone settings cannot change the horizon. Every `ForecastDay` exposes starting balance, credits, debits, ending balance, applied events, and minimum-balance violation status. The forecast reports the minimum ending balance and date but does not decide affordability or apply the requested purchase. Projected recurrence is necessarily limited where a user has fewer than two observed occurrences or irregular history, and no Phase 4 spending changes are applied.
+
 The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.
