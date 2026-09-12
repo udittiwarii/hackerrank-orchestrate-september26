@@ -70,4 +70,8 @@ Dates are parsed and advanced at UTC midnight, so local timezone settings cannot
 
 Each evaluated option exposes its feasibility, supplied dates and amounts, financing fee, total payable amount, completion status, and minimum balance after the plan. Feasible options are ranked by the challenge order: completion by deadline, no spending changes, total cost, earlier start, fewer payments, then lowest option ID. This phase does not invent partial-payment plans, apply spending changes, or make the final recommendation.
 
+### Phase 7: deterministic decision engine
+
+`src/decision/decisionEngine.ts` combines the Phase 5 baseline affordability result with Phase 6 supplied-plan feasibility. It recommends safe full payment first when the user accepts it, otherwise a permitted two-payment partial route when every challenge condition is satisfied, then the ranked supplied installment option, a safe later full payment, or `not_recommended`. The output-shaped decision preserves the safe amount, exact payment-plan facts, earliest full-payment date, `none` for spending changes, and a concise explanation generated only from structured values. No evidence interpretation, spending reduction, LLM call, or output-file generation occurs in this phase.
+
 The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.

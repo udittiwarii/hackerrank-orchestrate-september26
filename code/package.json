@@ -9,7 +9,8 @@
     "test:state": "tsx src/finance/state.test.ts",
     "test:forecast": "tsx src/finance/forecast.test.ts",
     "test:affordability": "tsx src/finance/affordability.test.ts",
-    "test:plans": "tsx src/finance/plans.test.ts"
+    "test:plans": "tsx src/finance/plans.test.ts",
+    "test:decision": "tsx src/decision/decisionEngine.test.ts"
   },
   "keywords": [],
   "author": "",
