@@ -7,4 +7,7 @@
  * none of those operations.
  */
 
-export {};
+import { loadDatasets } from "./src/data/loader.js";
+
+const data = loadDatasets();
+console.log(`Loaded ${data.requests.length} requests, ${data.sampleRequests.length} sample requests, ${data.financialProfiles.length} profiles, ${data.financialEvents.length} events, ${data.exchangeRates.length} exchange rates, ${data.paymentOptions.length} payment options, ${data.messages.length} messages, and ${data.images.length} images.`);

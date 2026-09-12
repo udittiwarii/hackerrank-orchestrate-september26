@@ -41,3 +41,5 @@ TODO
 ## Notes
 
 TODO: Record the run command, dataset scope, pricing assumptions, and any per-model breakdown.
+
+No external AI/LLM calls were made during the data-layer implementation phase.

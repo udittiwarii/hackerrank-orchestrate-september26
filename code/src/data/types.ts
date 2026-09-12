@@ -1,38 +1,21 @@
-/** Dataset schema types mirror only inspected CSV headers. */
-
-export interface FinancialProfileRow {
-  user_id: string; home_currency: string; current_available_balance: string;
-  minimum_balance_to_keep: string; financial_priorities: string;
-  expense_categories_to_protect: string; expense_categories_user_is_willing_to_reduce: string;
-  expense_categories_user_is_willing_to_stop: string; payment_methods_user_will_consider: string;
-  max_installment_months: string;
-}
-export interface FinancialEventRow {
-  event_id: string; user_id: string; event_type: string; description: string;
-  category: string; direction: string; amount: string; currency: string;
-  event_date: string; settlement_date: string; status: string; linked_event_id: string;
-  flexibility: string; minimum_allowed_amount: string;
-}
-export interface ExchangeRateRow { rate_date: string; from_currency: string; to_currency: string; rate: string; }
-export interface RequestRow {
-  request_id: string; user_id: string; request_date: string; request_type: string;
-  requested_amount: string; desired_completion_date: string; allows_partial_payment: string;
-  request_text: string;
-}
-export interface RequestPaymentOptionRow {
-  payment_option_id: string; request_id: string; payment_method: string; payment_amount: string;
-  number_of_payments: string; first_payment_date: string; payment_frequency_days: string;
-  financing_fee: string; total_payable_amount: string;
-}
-export interface MessageRow {
-  message_id: string; user_id: string; request_id: string; related_event_id: string;
-  sent_at: string; source_type: string; message_text: string;
-}
-export interface ImageRow { image_id: string; user_id: string; request_id: string; related_event_id: string; }
-export interface OutputRow {
-  request_id: string; amount_safe_to_pay: string; affordability_status: string;
-  recommended_payment_method: string; payment_plan: string; earliest_date_for_full_payment: string;
-  spending_changes_needed: string; decision_explanation: string;
-}
-export interface SampleRequestRow extends RequestRow, OutputRow {}
-/** TODO: define normalized domain models after loader implementation. */
+/** Typed, normalized records from the participant-facing CSV datasets. */
+export type Currency = "EUR" | "IDR" | "INR" | "USD" | "ZAR";
+export type RequestType = "debt_repayment" | "education" | "emergency_expense" | "family_transfer" | "housing" | "investment" | "other" | "purchase" | "travel";
+export type EventType = "debt_payment" | "expense" | "income" | "investment_purchase" | "investment_sale" | "investment_valuation" | "refund" | "subscription";
+export type EventDirection = "credit" | "debit" | "non_cash";
+export type EventStatus = "cancelled" | "failed" | "pending" | "scheduled" | "settled" | "unrealized";
+export type Flexibility = "fixed" | "reducible" | "reducible_or_stoppable" | "stoppable";
+export type PaymentMethod = "full_payment" | "installments";
+export type MessageSourceType = "bank" | "employer" | "financial_service" | "merchant" | "service_provider";
+export type AffordabilityStatus = "affordable_now" | "affordable_with_plan" | "affordable_later" | "not_affordable";
+export type RecommendedPaymentMethod = "full_payment" | "partial_payment" | "installments" | "wait" | "not_recommended";
+export interface Request { requestId: string; userId: string; requestDate: string; requestType: RequestType; requestedAmount: number; desiredCompletionDate: string; allowsPartialPayment: boolean; requestText: string; }
+export interface FinancialProfile { userId: string; homeCurrency: Currency; currentAvailableBalance: number; minimumBalanceToKeep: number; financialPriorities: string; expenseCategoriesToProtect: string; expenseCategoriesUserIsWillingToReduce: string | null; expenseCategoriesUserIsWillingToStop: string | null; paymentMethodsUserWillConsider: string; maxInstallmentMonths: number | null; }
+export interface FinancialEvent { eventId: string; userId: string; eventType: EventType; description: string; category: string; direction: EventDirection; amount: number | null; currency: Currency; eventDate: string; settlementDate: string | null; status: EventStatus; linkedEventId: string | null; flexibility: Flexibility; minimumAllowedAmount: number | null; }
+export interface ExchangeRate { rateDate: string; fromCurrency: Currency; toCurrency: Currency; rate: number; }
+export interface RequestPaymentOption { paymentOptionId: string; requestId: string; paymentMethod: PaymentMethod; paymentAmount: number; numberOfPayments: number; firstPaymentDate: string; paymentFrequencyDays: number | null; financingFee: number; totalPayableAmount: number; }
+export interface Message { messageId: string; userId: string; requestId: string | null; relatedEventId: string | null; sentAt: string; sourceType: MessageSourceType; messageText: string; }
+export interface Image { imageId: string; userId: string; requestId: string; relatedEventId: string; }
+export interface SampleRequest extends Request { amountSafeToPay: number; affordabilityStatus: AffordabilityStatus; recommendedPaymentMethod: RecommendedPaymentMethod; paymentPlan: string; earliestDateForFullPayment: string | null; spendingChangesNeeded: string; decisionExplanation: string; }
+export interface DataIndexes { requestById: Map<string, Request>; sampleRequestById: Map<string, SampleRequest>; profileByUserId: Map<string, FinancialProfile>; eventById: Map<string, FinancialEvent>; eventsByUserId: Map<string, FinancialEvent[]>; paymentOptionsByRequestId: Map<string, RequestPaymentOption[]>; messagesByUserId: Map<string, Message[]>; messagesByRequestId: Map<string, Message[]>; imagesByRequestId: Map<string, Image[]>; imagesByRelatedEventId: Map<string, Image[]>; exchangeRateByKey: Map<string, ExchangeRate>; }
+export interface LoadedData { requests: Request[]; sampleRequests: SampleRequest[]; financialProfiles: FinancialProfile[]; financialEvents: FinancialEvent[]; exchangeRates: ExchangeRate[]; paymentOptions: RequestPaymentOption[]; messages: Message[]; images: Image[]; indexes: DataIndexes; }

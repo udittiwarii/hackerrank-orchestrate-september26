@@ -1,6 +1,6 @@
 # Buy or Wait
 
-Terminal TypeScript/Node.js scaffold for the HackerRank Orchestrate financial-affordability challenge. This initialization contains no CSV loading, financial decisions, evidence processing, forecast, or `output.csv` generation.
+Terminal TypeScript/Node.js foundation for the HackerRank Orchestrate financial-affordability challenge. The typed data layer is implemented; financial decisions, evidence interpretation, forecasts, and `output.csv` generation are not.
 
 ## Architecture
 
@@ -11,8 +11,8 @@ Raw dataset -> loader -> typed data -> evidence -> financial state -> forecast
 
 | Module | Responsibility |
 | --- | --- |
-| `main.ts` | Future CLI orchestration point. |
-| `src/data/` | Dataset row types and future CSV normalization. |
+| `main.ts` | Loads datasets, builds indexes, and prints a concise count summary. |
+| `src/data/` | Typed CSV normalization, structural validation, and lookup indexes. |
 | `src/evidence/` | Future untrusted message and image evidence handling. |
 | `src/finance/` | Future state, 90-day forecast, affordability, and plan analysis. |
 | `src/decision/` | Future recommendation selection. |
@@ -21,20 +21,29 @@ Raw dataset -> loader -> typed data -> evidence -> financial state -> forecast
 
 ## Planned phases
 
-1. Validated CSV loading and normalized models.
-2. Evidence reconciliation and financial-state reconstruction.
-3. Deterministic forecasting, affordability, and payment plans.
-4. Decision validation, sample evaluation, and output writing.
+1. Evidence reconciliation and financial-state reconstruction.
+2. Deterministic forecasting, affordability, and payment plans.
+3. Decision validation, sample evaluation, and output writing.
 
 Financial decisions will be deterministic and rule-based wherever possible. Any future AI/LLM use is limited to interpreting unstructured evidence and remains independently validated.
 
 ## Build and run
 
-From `code/`:
+From `code/`, install dependencies and run:
 
 ```text
 npm run build
 npm run dev
 ```
 
-The completed solution must read `../dataset/`, write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.
+`npm run dev` loads `../dataset/`; invoking the compiled program from the repository root also finds `dataset/` there.
+
+## Data Layer
+
+The loader reads `requests.csv`, `sample_requests.csv`, `financial_profiles.csv`, `financial_events.csv`, `exchange_rates.csv`, `request_payment_options.csv`, `messages.csv`, and `images.csv`. Its interfaces mirror the inspected headers and convert numeric fields to `number`, booleans to `boolean`, and observed blank nullable fields to `null`—not zero. Dates remain validated `YYYY-MM-DD` strings and message timestamps remain validated timestamp strings.
+
+It validates required headers, missing files, malformed CSV, numeric and date values, observed enum values, and duplicate primary/composite IDs. Errors identify the dataset, row, column, and problem. It uses `csv-parse` for quoted fields, embedded commas, escaped quotes, and newline-safe parsing.
+
+`loadDatasets()` returns normalized arrays plus `Map` indexes for request/profile/event IDs, events by user, payment options by request, messages by user/request, images by request/related event, and dated currency-pair rates. The loader preserves raw business facts; it does not apply affordability or financial interpretation.
+
+The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.
