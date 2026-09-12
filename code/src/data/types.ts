@@ -113,3 +113,28 @@ export interface AffordabilityAnalysis {
 	earliestFullPaymentDate: string | null;
 	status: BaselineAffordabilityStatus;
 }
+
+export interface PaymentPlanEvaluation {
+	paymentOptionId: string;
+	requestId: string;
+	paymentMethod: PaymentMethod;
+	feasible: boolean;
+	infeasibilityReason: string | null;
+	totalPayableAmount: number;
+	financingFee: number;
+	paymentDates: string[];
+	paymentAmounts: number[];
+	minimumProjectedBalanceAfterPlan: number;
+	completesByDesiredCompletionDate: boolean;
+}
+
+export interface PaymentPlanAnalysis {
+	requestId: string;
+	userId: string;
+	requestedAmount: number;
+	desiredCompletionDate: string;
+	forecastEndDate: string;
+	evaluatedOptions: PaymentPlanEvaluation[];
+	rankedFeasibleOptions: PaymentPlanEvaluation[];
+	bestFeasiblePaymentOptionId: string | null;
+}

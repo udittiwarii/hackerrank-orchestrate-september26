@@ -64,4 +64,10 @@ Dates are parsed and advanced at UTC midnight, so local timezone settings cannot
 
 `src/finance/affordability.ts` computes baseline payment capacity without applying a purchase or selecting a payment plan. The safe amount today is capped at the request amount and is calculated from the request-date pre-event balance minus `minimumBalanceToKeep`; pending debit reserves are already included in that balance by Phase 3. Future full-payment checks use each forecast day's post-baseline-event ending balance, stop at the requested completion date and 90-day forecast boundary, and return the earliest safe date. Results distinguish `affordable_now`, `affordable_later`, and `not_affordable`; partial-payment permission is preserved for later phases but does not cause a plan here. A small `1e-9` numerical tolerance handles binary floating-point representation only.
 
+### Phase 6: deterministic payment-plan analysis
+
+`src/finance/plans.ts` evaluates only the payment options supplied for each request. It expands each option's supplied payment amount and schedule, checks accepted payment methods and installment-month limits, enforces the request deadline and 90-day forecast boundary, and simulates each payment after baseline forecast cash flow. Pending debits are already reflected in the Phase 3 starting balance and are not reserved again; pending credits and excluded event types never enter the forecast.
+
+Each evaluated option exposes its feasibility, supplied dates and amounts, financing fee, total payable amount, completion status, and minimum balance after the plan. Feasible options are ranked by the challenge order: completion by deadline, no spending changes, total cost, earlier start, fewer payments, then lowest option ID. This phase does not invent partial-payment plans, apply spending changes, or make the final recommendation.
+
 The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.
