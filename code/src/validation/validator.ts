@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";
 import type { FinalDecision, LoadedData } from "../data/types.js";
-import { OUTPUT_HEADERS, runPipeline } from "../../main.js";
+import { OUTPUT_HEADERS, runPipeline, runPipelineWithEvidence } from "../../main.js";
 
 const AFFORDABILITY_STATUSES = new Set(["affordable_now", "affordable_with_plan", "affordable_later", "not_affordable"]);
 const PAYMENT_METHODS = new Set(["full_payment", "partial_payment", "installments", "wait", "not_recommended"]);
@@ -70,7 +70,8 @@ export function validateOutputFile(outputPath: string, data: LoadedData, expecte
 
 if (process.argv[1]?.endsWith("validator.ts") || process.argv[1]?.endsWith("validator.js")) {
 	const data = (await import("../data/loader.js")).loadDatasets();
-	const result = validateOutputFile(process.argv[2] ?? "../output.csv", data);
+	const pipeline = await runPipelineWithEvidence(data);
+	const result = validateOutputFile(process.argv[2] ?? "../output.csv", data, pipeline.decisions);
 	if (result.errors.length > 0) { console.error(result.errors.join("\n")); process.exitCode = 1; }
 	else console.log(`Validated ${result.rowCount} output rows.`);
 }

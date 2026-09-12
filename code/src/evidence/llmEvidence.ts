@@ -9,6 +9,7 @@ import type {
   Request,
   ValidatedEvidence,
 } from "../data/types.js";
+import { buildIndexes } from "../data/loader.js";
 
 const currencyValues = ["EUR", "IDR", "INR", "USD", "ZAR"] as const;
 const evidenceSchema = z.object({
@@ -198,4 +199,39 @@ function evidencePrecedes(previous: ValidatedEvidence, candidate: ValidatedEvide
   if (candidate.sourceSentAt !== previous.sourceSentAt) return candidate.sourceSentAt > previous.sourceSentAt;
   if (candidate.confidence !== previous.confidence) return candidate.confidence > previous.confidence;
   return candidate.sourceId > previous.sourceId;
+}
+
+export function hasRelevantEvidence(data: LoadedData, requestId: string): boolean {
+  const request = data.indexes.requestById.get(requestId);
+  if (!request) return false;
+  const eventIds = new Set((data.indexes.eventsByUserId.get(request.userId) ?? []).map((event) => event.eventId));
+  return data.messages.some((message) => message.userId === request.userId
+    && (message.requestId === requestId || (message.relatedEventId !== null && eventIds.has(message.relatedEventId))))
+    || data.images.some((image) => image.userId === request.userId && image.requestId === requestId && eventIds.has(image.relatedEventId));
+}
+
+/** Applies only validated claims to already-existing linked events. Profile and request facts remain immutable. */
+export function applyValidatedEvidence(data: LoadedData, reconciliation: EvidenceReconciliation): LoadedData {
+  if (reconciliation.usableEvidence.length === 0) return data;
+  const updates = new Map<string, Partial<LoadedData["financialEvents"][number]>>();
+  for (const fact of reconciliation.usableEvidence) {
+    if (!fact.eventId) continue;
+    const event = data.indexes.eventById.get(fact.eventId);
+    if (!event) continue;
+    const update = updates.get(fact.eventId) ?? {};
+    if (fact.claimedAmount !== null && fact.claimedCurrency !== null && (fact.evidenceType === "amount_claim" || fact.evidenceType === "income_claim" || fact.evidenceType === "expense_claim" || fact.evidenceType === "amendment")) {
+      update.amount = fact.claimedAmount;
+      update.currency = fact.claimedCurrency;
+    }
+    if (fact.claimedDate !== null && (fact.evidenceType === "date_claim" || fact.evidenceType === "amendment" || fact.evidenceType === "settlement")) update.settlementDate = fact.claimedDate;
+    if (fact.claimedStatus !== null && (fact.evidenceType === "status_update" || fact.evidenceType === "cancellation" || fact.evidenceType === "settlement" || fact.evidenceType === "amendment")) {
+      const statusMap = { cancelled: "cancelled", confirmed: "scheduled", delayed: "pending", pending: "pending", settled: "settled", updated: event.status } as const;
+      update.status = statusMap[fact.claimedStatus];
+    }
+    updates.set(fact.eventId, update);
+  }
+  if (updates.size === 0) return data;
+  const financialEvents = data.financialEvents.map((event) => updates.has(event.eventId) ? { ...event, ...updates.get(event.eventId) } : event);
+  const base = { ...data, financialEvents };
+  return { ...base, indexes: buildIndexes(base) };
 }
