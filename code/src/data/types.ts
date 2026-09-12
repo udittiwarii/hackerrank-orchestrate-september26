@@ -19,3 +19,41 @@ export interface Image { imageId: string; userId: string; requestId: string; rel
 export interface SampleRequest extends Request { amountSafeToPay: number; affordabilityStatus: AffordabilityStatus; recommendedPaymentMethod: RecommendedPaymentMethod; paymentPlan: string; earliestDateForFullPayment: string | null; spendingChangesNeeded: string; decisionExplanation: string; }
 export interface DataIndexes { requestById: Map<string, Request>; sampleRequestById: Map<string, SampleRequest>; profileByUserId: Map<string, FinancialProfile>; eventById: Map<string, FinancialEvent>; eventsByUserId: Map<string, FinancialEvent[]>; paymentOptionsByRequestId: Map<string, RequestPaymentOption[]>; messagesByUserId: Map<string, Message[]>; messagesByRequestId: Map<string, Message[]>; imagesByRequestId: Map<string, Image[]>; imagesByRelatedEventId: Map<string, Image[]>; exchangeRateByKey: Map<string, ExchangeRate>; }
 export interface LoadedData { requests: Request[]; sampleRequests: SampleRequest[]; financialProfiles: FinancialProfile[]; financialEvents: FinancialEvent[]; exchangeRates: ExchangeRate[]; paymentOptions: RequestPaymentOption[]; messages: Message[]; images: Image[]; indexes: DataIndexes; }
+
+export type StateEventKind = "committed_obligation" | "essential_expense" | "flexible_expense" | "future_income" | "pending_debit" | "pending_credit" | "settled_cash" | "excluded";
+
+export interface StateEvent {
+	event: FinancialEvent;
+	amountInHomeCurrency: number | null;
+	kind: StateEventKind;
+	cashDate: string | null;
+}
+
+export interface FinancialState {
+	requestId: string;
+	userId: string;
+	asOfDate: string;
+	homeCurrency: Currency;
+	currentAvailableBalance: number;
+	minimumBalanceToKeep: number;
+	balanceAfterPendingDebits: number;
+	pendingDebitsReserved: number;
+	pendingCreditsExcluded: number;
+	settledIncome: StateEvent[];
+	futureConfirmedIncome: StateEvent[];
+	recurringExpenses: StateEvent[];
+	essentialExpenses: StateEvent[];
+	flexibleExpenses: StateEvent[];
+	committedObligations: StateEvent[];
+	pendingDebits: StateEvent[];
+	pendingCredits: StateEvent[];
+	settledCashEvents: StateEvent[];
+	excludedEvents: StateEvent[];
+	allEvents: StateEvent[];
+	financialPriorities: string[];
+	protectedExpenseCategories: string[];
+	reducibleExpenseCategories: string[];
+	stoppableExpenseCategories: string[];
+	paymentMethodsUserWillConsider: string[];
+	maxInstallmentMonths: number | null;
+}

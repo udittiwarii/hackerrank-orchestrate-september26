@@ -46,4 +46,12 @@ It validates required headers, missing files, malformed CSV, numeric and date va
 
 `loadDatasets()` returns normalized arrays plus `Map` indexes for request/profile/event IDs, events by user, payment options by request, messages by user/request, images by request/related event, and dated currency-pair rates. The loader preserves raw business facts; it does not apply affordability or financial interpretation.
 
+### Phase 3: financial state reconstruction
+
+`src/finance/state.ts` reconstructs a deterministic `FinancialState` for each request before the requested purchase is applied. It uses the profile's available balance and minimum balance, retains protected/reducible/stoppable category permissions, classifies historical expenses and future committed obligations, preserves confirmed future income, and exposes pending debit reserves separately from pending credits.
+
+Only settled cash events affect settled cash classifications. Failed, cancelled, unrealized, non-cash, and amount-missing records are excluded from spendable cash; pending debits are reserved and pending credits are not available. Linked records are deduplicated only when the linked record is a same-type, same-direction settled equivalent. Distinct linked cash events such as refunds, investment sales, or valuation records remain distinct, with unrealized/non-cash values never treated as spendable. Foreign cash events use the fixed exchange-rate row for their settlement date and currency direction.
+
+Forecasting, affordability, payment plans, spending changes, evidence interpretation, and output generation remain future phases. `src/finance/state.test.ts` runs deterministic checks against all 250 real requests without creating synthetic financial data.
+
 The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.
