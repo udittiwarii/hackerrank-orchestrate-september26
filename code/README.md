@@ -60,4 +60,8 @@ Forecasting, affordability, payment plans, spending changes, evidence interpreta
 
 Dates are parsed and advanced at UTC midnight, so local timezone settings cannot change the horizon. Every `ForecastDay` exposes starting balance, credits, debits, ending balance, applied events, and minimum-balance violation status. The forecast reports the minimum ending balance and date but does not decide affordability or apply the requested purchase. Projected recurrence is necessarily limited where a user has fewer than two observed occurrences or irregular history, and no Phase 4 spending changes are applied.
 
+### Phase 5: deterministic affordability analysis
+
+`src/finance/affordability.ts` computes baseline payment capacity without applying a purchase or selecting a payment plan. The safe amount today is capped at the request amount and is calculated from the request-date pre-event balance minus `minimumBalanceToKeep`; pending debit reserves are already included in that balance by Phase 3. Future full-payment checks use each forecast day's post-baseline-event ending balance, stop at the requested completion date and 90-day forecast boundary, and return the earliest safe date. Results distinguish `affordable_now`, `affordable_later`, and `not_affordable`; partial-payment permission is preserved for later phases but does not cause a plan here. A small `1e-9` numerical tolerance handles binary floating-point representation only.
+
 The completed solution must write root-level `output.csv`, preserve its exact required schema, use no organizer-only data, and never embed secrets.

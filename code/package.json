@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "tsx main.ts",
     "test:state": "tsx src/finance/state.test.ts",
-    "test:forecast": "tsx src/finance/forecast.test.ts"
+    "test:forecast": "tsx src/finance/forecast.test.ts",
+    "test:affordability": "tsx src/finance/affordability.test.ts"
   },
   "keywords": [],
   "author": "",

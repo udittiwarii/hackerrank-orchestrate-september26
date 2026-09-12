@@ -94,3 +94,22 @@ export interface FinancialForecast {
 	minimumProjectedBalance: number;
 	minimumProjectedBalanceDate: string;
 }
+
+export type BaselineAffordabilityStatus = "affordable_now" | "affordable_later" | "not_affordable";
+
+export interface AffordabilityAnalysis {
+	requestId: string;
+	userId: string;
+	requestDate: string;
+	desiredCompletionDate: string;
+	forecastEndDate: string;
+	requestedAmount: number;
+	allowsPartialPayment: boolean;
+	minimumBalanceToKeep: number;
+	startingBalance: number;
+	amountSafeToday: number;
+	fullAmountSafeToday: boolean;
+	fullAmountSafeByDeadline: boolean;
+	earliestFullPaymentDate: string | null;
+	status: BaselineAffordabilityStatus;
+}
