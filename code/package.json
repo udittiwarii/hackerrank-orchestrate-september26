@@ -1,0 +1,19 @@
+{
+  "name": "buy-or-wait",
+  "version": "1.0.0",
+  "description": "Deterministic financial-affordability CLI for HackerRank Orchestrate.",
+  "scripts": {
+    "dev": "tsx main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
