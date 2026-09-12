@@ -295,3 +295,40 @@ export interface FinalDecision {
   spendingChangesNeeded: string;
   decisionExplanation: string;
 }
+
+export type EvidenceSourceKind = "message" | "image";
+export type EvidenceType =
+  | "amount_claim"
+  | "date_claim"
+  | "status_update"
+  | "cancellation"
+  | "settlement"
+  | "amendment"
+  | "income_claim"
+  | "expense_claim";
+export type EvidenceClaimStatus = "cancelled" | "confirmed" | "delayed" | "pending" | "settled" | "updated";
+
+export interface EvidenceFact {
+  evidenceType: EvidenceType;
+  requestId: string | null;
+  eventId: string | null;
+  claimedAmount: number | null;
+  claimedCurrency: Currency | null;
+  claimedDate: string | null;
+  claimedStatus: EvidenceClaimStatus | null;
+  sourceReference: string;
+  confidence: number;
+  explanation: string;
+}
+
+export interface ValidatedEvidence extends EvidenceFact {
+  sourceKind: EvidenceSourceKind;
+  sourceId: string;
+  sourceSentAt: string;
+}
+
+export interface EvidenceReconciliation {
+  requestId: string;
+  usableEvidence: ValidatedEvidence[];
+  rejectedEvidence: Array<{ sourceKind: EvidenceSourceKind; sourceId: string; reason: string }>;
+}
